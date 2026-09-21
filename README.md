@@ -106,6 +106,14 @@ Tables are created automatically on first query.
 
 `render.yaml` is included as a Render Blueprint (web service plus a managed Postgres database).
 
+## Tests
+
+```bash
+npm test          # Vitest, no database or network needed
+```
+
+88 tests across auth (session tokens, expiry, tamper resistance), API keys (format, hash-only storage, scope and revocation rules), the CORS allowlist, email escaping, and the `/api/lead`, `/api/track`, and `/api/v1/contacts` handlers. The database layer is mocked, so the suite runs in well under a second and in CI without Postgres. GitHub Actions runs type-check, lint, and tests on every push.
+
 ## Design decisions
 
 - **One backend for two sites.** A shared CRM avoids splitting leads across two dashboards. Cross-origin writes are restricted to an explicit `ALLOWED_ORIGINS` allowlist, and only the two public endpoints are exposed to it.
@@ -117,7 +125,7 @@ Tables are created automatically on first query.
 
 ## Known limitations
 
-- No automated test suite yet
+- Tests cover the pure logic and the public API handlers (88 unit tests); there are no database-backed integration tests or browser end-to-end tests yet
 - No rate limiting on the public endpoints
 - A single shared admin password (no per-user accounts or roles)
 - Session IDs are per-origin, so a visitor moving between the two sites appears as two sessions
