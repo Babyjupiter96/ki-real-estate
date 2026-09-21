@@ -30,6 +30,7 @@ const WRITABLE_FIELDS = [
   "seo_situation",
   "budget",
   "message",
+  "session_id",
   "next_follow_up_at",
   "last_contacted_at",
   "last_reminder_sent_at",

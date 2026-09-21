@@ -16,6 +16,18 @@ export function getSessionId(): string {
   }
 }
 
+function pageViewContext(type: string): Record<string, string> {
+  if (type !== "page_view") return {};
+  const params = new URLSearchParams(window.location.search);
+  const context: Record<string, string> = {
+    referrer: document.referrer,
+    device: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "mobile" : "desktop",
+  };
+  const utm = params.get("utm_source");
+  if (utm) context.utm_source = utm;
+  return context;
+}
+
 export function track(
   type: "page_view" | "cta_click" | "form_start" | "form_step" | "form_submit",
   meta: Record<string, unknown> = {}
@@ -26,7 +38,7 @@ export function track(
       type,
       path: window.location.pathname,
       sessionId: getSessionId(),
-      meta,
+      meta: { ...pageViewContext(type), ...meta, site: "real-estate" },
     });
     fetch("/api/track", {
       method: "POST",

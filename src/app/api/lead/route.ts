@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     seo_situation: payload.seoSituation ?? "",
     budget: payload.budget ?? "",
     message: payload.message ?? "",
+    session_id: payload.sessionId ?? "",
     next_follow_up_at: nextFollowUpAt,
   });
 

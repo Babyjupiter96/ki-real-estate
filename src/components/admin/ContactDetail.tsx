@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Contact, ContactActivity, ContactNote, ContactStatus } from "@/lib/db";
+import type {
+  Contact,
+  ContactActivity,
+  ContactNote,
+  ContactStatus,
+  PageEvent,
+} from "@/lib/db";
+import { describeEvent } from "@/lib/event-format";
 import { StatusBadge } from "./StatusBadge";
 
 const STATUSES: ContactStatus[] = ["new", "contacted", "qualified", "won", "lost"];
@@ -11,10 +18,12 @@ export function ContactDetail({
   contact,
   initialNotes,
   initialActivity,
+  journey,
 }: {
   contact: Contact;
   initialNotes: ContactNote[];
   initialActivity: ContactActivity[];
+  journey: PageEvent[];
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(contact.status);
@@ -202,6 +211,29 @@ export function ContactDetail({
             >
               Delete Contact
             </button>
+          </Section>
+
+          <Section title="Visitor Journey">
+            {journey.length === 0 ? (
+              <p className="text-sm text-stone-dark">
+                No browsing history recorded for this contact.
+              </p>
+            ) : (
+              <ol className="space-y-3">
+                {journey.map((e) => {
+                  const { label, detail } = describeEvent(e);
+                  return (
+                    <li key={e.id} className="border-l border-line-strong pl-3">
+                      <p className="text-sm text-paper/90">{label}</p>
+                      {detail && <p className="text-xs text-stone">{detail}</p>}
+                      <p className="text-xs text-stone-dark">
+                        {new Date(e.created_at).toLocaleString()}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
           </Section>
 
           <Section title="Activity">

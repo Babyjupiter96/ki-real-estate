@@ -86,6 +86,21 @@ const SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_page_events_type ON page_events(type);
   CREATE INDEX IF NOT EXISTS idx_page_events_created ON page_events(created_at);
   CREATE INDEX IF NOT EXISTS idx_contact_activity_contact ON contact_activity(contact_id);
+
+  ALTER TABLE contacts ADD COLUMN IF NOT EXISTS session_id TEXT NOT NULL DEFAULT '';
+  CREATE INDEX IF NOT EXISTS idx_page_events_session ON page_events(session_id);
+
+  CREATE TABLE IF NOT EXISTS api_keys (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    key_prefix TEXT NOT NULL,
+    key_hash TEXT NOT NULL UNIQUE,
+    scope TEXT NOT NULL DEFAULT 'read',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_used_at TIMESTAMPTZ,
+    revoked_at TIMESTAMPTZ,
+    request_count INTEGER NOT NULL DEFAULT 0
+  );
 `;
 
 let schemaReady: Promise<void> | null = null;
@@ -143,6 +158,7 @@ export type Contact = {
   seo_situation: string;
   budget: string;
   message: string;
+  session_id: string;
   next_follow_up_at: string | null;
   last_contacted_at: string | null;
   last_reminder_sent_at: string | null;
@@ -161,6 +177,28 @@ export type ContactActivity = {
   created_at: string;
   type: string;
   meta: string;
+};
+
+export type PageEvent = {
+  id: number;
+  created_at: string;
+  type: string;
+  path: string;
+  session_id: string;
+  meta: string;
+};
+
+export type ApiKeyScope = "read" | "read_write";
+
+export type ApiKey = {
+  id: number;
+  name: string;
+  key_prefix: string;
+  scope: ApiKeyScope;
+  created_at: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+  request_count: number;
 };
 
 export async function logActivity(

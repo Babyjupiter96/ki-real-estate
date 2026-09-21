@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getAnalyticsSummary } from "@/lib/analytics";
+import { getAnalyticsSummary, getRecentEvents } from "@/lib/analytics";
+import { describeEvent } from "@/lib/event-format";
 import { listContacts } from "@/lib/contacts";
 import { RunFollowUpsButton } from "@/components/admin/RunFollowUpsButton";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboardPage() {
   const summary = await getAnalyticsSummary();
   const { contacts: recent } = await listContacts({ limit: 8 });
+  const liveEvents = await getRecentEvents(20);
 
   const statusCounts = Object.fromEntries(
     summary.totals.map((t) => [t.status, t.count])
@@ -53,7 +55,7 @@ export default async function AdminDashboardPage() {
           ) : (
             <div className="flex h-32 items-end gap-1.5">
               {summary.dailyPageViews.map((d) => (
-                <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
+                <div key={d.day} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                   <div
                     className="w-full rounded-t bg-signal/80"
                     style={{ height: `${(d.count / maxDaily) * 100}%`, minHeight: 2 }}
@@ -82,6 +84,34 @@ export default async function AdminDashboardPage() {
             </ul>
           )}
         </div>
+      </div>
+
+      <div className="mt-10 rounded-2xl border border-line-strong bg-ink-2">
+        <div className="border-b border-line px-6 py-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone">
+            Live Activity
+          </h2>
+        </div>
+        {liveEvents.length === 0 ? (
+          <p className="px-6 py-6 text-sm text-stone-dark">No visitor activity yet.</p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {liveEvents.map((e) => {
+              const { label, detail } = describeEvent(e);
+              return (
+                <li key={e.id} className="flex items-start justify-between gap-4 px-6 py-3">
+                  <div>
+                    <p className="text-sm text-paper/90">{label}</p>
+                    {detail && <p className="text-xs text-stone">{detail}</p>}
+                  </div>
+                  <span className="shrink-0 text-xs text-stone-dark">
+                    {new Date(e.created_at).toLocaleString()}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       <div className="mt-10 rounded-2xl border border-line-strong bg-ink-2">

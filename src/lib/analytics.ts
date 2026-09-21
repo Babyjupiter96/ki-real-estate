@@ -1,4 +1,4 @@
-import { query } from "./db";
+import { query, type PageEvent } from "./db";
 import { dashboardStats } from "./contacts";
 
 export async function getAnalyticsSummary() {
@@ -37,3 +37,18 @@ export async function getAnalyticsSummary() {
 }
 
 export type AnalyticsSummary = Awaited<ReturnType<typeof getAnalyticsSummary>>;
+
+export async function getSessionEvents(sessionId: string): Promise<PageEvent[]> {
+  if (!sessionId) return [];
+  return query<PageEvent>(
+    `SELECT * FROM page_events WHERE session_id = $1 ORDER BY created_at ASC LIMIT 200`,
+    [sessionId]
+  );
+}
+
+export async function getRecentEvents(limit = 25): Promise<PageEvent[]> {
+  return query<PageEvent>(
+    `SELECT * FROM page_events ORDER BY created_at DESC LIMIT $1`,
+    [limit]
+  );
+}

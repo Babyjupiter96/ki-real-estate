@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <nav className="flex flex-1 flex-col gap-1 px-3">
             <NavLink href="/admin">Dashboard</NavLink>
             <NavLink href="/admin/contacts">Contacts</NavLink>
+            <NavLink href="/admin/api-keys">API Keys</NavLink>
           </nav>
           <div className="border-t border-line px-3 py-4">
             <LogoutButton />

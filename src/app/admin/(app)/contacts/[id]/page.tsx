@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getActivity, getContact, getNotes } from "@/lib/contacts";
+import { getSessionEvents } from "@/lib/analytics";
 import { ContactDetail } from "@/components/admin/ContactDetail";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,14 @@ export default async function ContactDetailPage({
 
   const notes = await getNotes(contact.id);
   const activity = await getActivity(contact.id);
+  const journey = await getSessionEvents(contact.session_id);
 
-  return <ContactDetail contact={contact} initialNotes={notes} initialActivity={activity} />;
+  return (
+    <ContactDetail
+      contact={contact}
+      initialNotes={notes}
+      initialActivity={activity}
+      journey={journey}
+    />
+  );
 }
